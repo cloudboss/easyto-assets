@@ -1,0 +1,3 @@
+#!__DIR_ET__/bin/busybox sh
+
+exec __DIR_ET__/bin/busybox sh --noprofile ${@}

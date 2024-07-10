@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+ARCHIVE_SRC=./usr/lib/systemd/boot/efi/systemd-bootx64.efi
+DEST=/staging/boot/EFI/BOOT/BOOTX64.EFI
+
+tmpdir=$(mktemp -d)
+ar --output ${tmpdir} -xf ${SYSTEMD_BOOT_ARCHIVE} data.tar.xz
+xzcat ${tmpdir}/data.tar.xz | tar -C ${tmpdir} -mxf - ${ARCHIVE_SRC}
+install -m 0755 ${tmpdir}/${ARCHIVE_SRC} ${DEST}

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+. /functions
+
+# Get the default CFLAGS so we can append to them.
+. <(grep ^CFLAGS= ./configure)
+[ -n "${CFLAGS}" ] || fail "CFLAGS not found in btrfs-progs configure script"
+
+export CFLAGS="${CFLAGS} -I${DIR_TMPINSTALL_UTIL_LINUX}/include"
+
+./configure \
+    --prefix=${DIR_TMPINSTALL_BTRFS_PROGS} \
+    --disable-documentation \
+    --disable-convert \
+    --disable-libudev \
+    --disable-python \
+    --disable-shared \
+    --disable-libudev \
+    --disable-backtrace
+
+make -j$(nproc) static
+make -j$(nproc) install-static
+strip ${DIR_TMPINSTALL_BTRFS_PROGS}/bin/*

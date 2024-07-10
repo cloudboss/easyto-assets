@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+export LDFLAGS="-s -static"
+
+./configure \
+    --prefix=${DIR_TMPINSTALL_E2FSPROGS} \
+    --enable-libblkid=false
+make
+make install

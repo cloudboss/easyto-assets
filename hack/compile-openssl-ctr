@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+./config \
+    --prefix=${DIR_TMPINSTALL_OPENSSL} \
+    --libdir=${DIR_TMPINSTALL_OPENSSL}/lib \
+    no-shared \
+    no-pic
+make -j$(nproc)
+make -j$(nproc) install_sw

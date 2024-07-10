@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+uid=$(id -u)
+gid=$(id -g)
+
+./configure LDFLAGS="--static -s" \
+    --prefix=${DIR_TMPINSTALL_SUDO} \
+    --disable-log-client \
+    --disable-log-server \
+    --disable-shared \
+    --enable-static \
+    --enable-zlib=static \
+    --localstatedir=${DIR_ET}/var \
+    --sysconfdir=${DIR_ET}/etc \
+    --with-logpath=${DIR_ET}/var/log \
+    --with-rundir=${DIR_ET}/run \
+    --with-vardir=${DIR_ET}/var/lib/sudo
+make -j$(nproc) install_uid=${uid} install_gid=${gid}
+make -j$(nproc) install_uid=${uid} install_gid=${gid} install

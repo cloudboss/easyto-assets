@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+here=$(dirname $0)
+. ${here}/functions
+
+SRC=${1}
+DST=${2}
+
+[ -n "${SRC}" ] || fail "Usage: $0 <src> <dst>"
+[ -n "${DST}" ] || fail "Usage: $0 <src> <dst>"
+
+[ -f "${DST}" ] || cp ${SRC} ${DST}
+cmp ${SRC} ${DST} || cp ${SRC} ${DST}
+cat ${DST}

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+./configure \
+    --prefix=${DIR_TMPINSTALL_ZLIB} \
+    --static
+make -j$(nproc)
+make -j$(nproc) install

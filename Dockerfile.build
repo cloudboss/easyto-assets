@@ -1,0 +1,39 @@
+# Dockerfile for local build image.
+ARG FROM
+
+FROM ${FROM}
+
+ARG UID
+ARG GID
+
+RUN apk add \
+    autoconf \
+    automake \
+    bison \
+    build-base \
+    diffutils \
+    elfutils-dev \
+    flex \
+    gcc \
+    libcap-dev \
+    libcap-static \
+    libtool \
+    linux-headers \
+    lz4 \
+    lzo-dev \
+    make \
+    musl-dev \
+    openssl \
+    openssl-dev \
+    pahole \
+    perl \
+    python3 \
+    tar \
+    zlib-static \
+    zstd-static
+
+RUN getent group ${GID} 2>&1 >/dev/null || addgroup -g ${GID} build && \
+    group_name=$(getent group ${GID} | awk -F : '{print $1}') && \
+    getent passwd -u ${UID} || adduser -G ${group_name} -u ${UID} -D build
+
+USER ${UID}:${GID}

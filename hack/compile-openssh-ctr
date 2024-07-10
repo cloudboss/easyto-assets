@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+autoreconf -i
+./configure LDFLAGS="-s -static" \
+    --prefix=${DIR_TMPINSTALL_OPENSSH} \
+    --with-default-path=${OPENSSH_DEFAULT_PATH} \
+    --with-privsep-path=${OPENSSH_PRIVSEP_DIR} \
+    --with-privsep-user=${OPENSSH_PRIVSEP_USER} \
+    --with-ssl-dir=${DIR_TMPINSTALL_OPENSSL} \
+    --with-zlib=${DIR_TMPINSTALL_ZLIB} \
+    --disable-wtmp
+make -j$(nproc)
+make -j$(nproc) install

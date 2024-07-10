@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+export CFLAGS=-static
+export LDFLAGS=-s
+./configure \
+    --prefix=${DIR_TMPINSTALL_CHRONY} \
+    --chronyrundir=${CHRONYRUNDIR} \
+    --localstatedir=${LOCALSTATEDIR} \
+    --sysconfdir=${SYSCONFDIR} \
+    --with-pidfile=${CHRONYRUNDIR}/chronyd.pid \
+    --with-user=${CHRONY_USER}
+make -j$(nproc)
+make -j$(nproc) install
