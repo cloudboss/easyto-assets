@@ -554,9 +554,7 @@ $(DIR_RELEASE_RUNTIME)/ssh.tar: \
 	@$(MAKE) $(DIR_RELEASE_RUNTIME)/
 	@cd $(DIR_STG_SSH) && fakeroot tar cpf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/ssh.tar .
 
-PACKER_ASSETS := $(DIR_RELEASE_PACKER)/build.pkr.hcl \
-	$(DIR_RELEASE_PACKER)/$(PACKER_EXE) \
-	$(DIR_RELEASE_PACKER)/provision \
+PACKER_ASSETS = $(DIR_RELEASE_PACKER)/$(PACKER_EXE) \
 	$(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
 
 $(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: $(HAS_COMMAND_FAKEROOT) \
@@ -580,13 +578,6 @@ $(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: $(HAS_COMMAND_FAKEROOT) \
 		fakeroot tar -cz \
 		--xform "s|^|$(PROJECT)-runtime-$(VERSION)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz .
-
-$(DIR_RELEASE_PACKER)/build.pkr.hcl: $(DIR_ROOT)/packer/build.pkr.hcl
-	@$(MAKE) $(DIR_RELEASE_PACKER)/
-	@install -m 0644 $(DIR_ROOT)/packer/build.pkr.hcl $(DIR_RELEASE_PACKER)/build.pkr.hcl
-
-$(DIR_RELEASE_PACKER)/provision: $(DIR_ROOT)/packer/provision
-	@install -m 0755 $(DIR_ROOT)/packer/provision $(DIR_RELEASE_PACKER)/provision
 
 $(DIR_RELEASE_PACKER)/$(PACKER_EXE): $(HAS_COMMAND_UNZIP) $(DIR_OUT)/$(PACKER_ARCHIVE)
 	@$(MAKE) $(DIR_RELEASE_PACKER)/
