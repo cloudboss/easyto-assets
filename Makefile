@@ -1,22 +1,23 @@
-PROJECT := easyto-assets
-OS := $(shell uname | tr [:upper:] [:lower:])
-ARCH := $(shell arch=$$(uname -m); [ "$${arch}" = "x86_64" ] && echo "amd64" || echo $${arch})
-VERSION :=
+	PROJECT = $(shell basename ${PWD})
+OS = $(shell uname | tr [:upper:] [:lower:])
+ARCH = $(shell arch=$$(uname -m); [ "$${arch}" = "x86_64" ] && echo "amd64" || echo $${arch})
+VERSION =
+DIR_OUT = _output
 
-DIR_ET := .easyto
-DIR_OUT := _output
-DIR_ROOT := $(shell echo ${PWD})
+DIR_STG = $(DIR_OUT)/staging
+DIR_STG_BOOTLOADER = $(DIR_STG)/bootloader
+DIR_STG_BASE = $(DIR_STG)/base
+DIR_STG_CHRONY = $(DIR_STG)/chrony
+DIR_STG_KERNEL = $(DIR_STG)/kernel
+DIR_STG_SSH = $(DIR_STG)/ssh
+DIR_STG_PACKER = $(DIR_STG)/packer/$(OS)/$(ARCH)
+DIR_STG_PACKER_PLUGIN = $(DIR_STG_PACKER)/plugins/github.com/hashicorp/amazon
+DIR_STG_RUNTIME = $(DIR_STG)/runtime
+DIRS_STG_CLEAN = $(DIR_STG_BASE) $(DIR_STG_CHRONY) $(DIR_STG_KERNEL) $(DIR_STG_SSH)
 
-DIR_STG_BOOTLOADER := $(DIR_OUT)/staging/bootloader
-DIR_STG_BASE := $(DIR_OUT)/staging/base
-DIR_STG_CHRONY := $(DIR_OUT)/staging/chrony
-DIR_STG_KERNEL := $(DIR_OUT)/staging/kernel
-DIR_STG_SSH := $(DIR_OUT)/staging/ssh
+include Makefile.inc
 
 DIR_RELEASE := $(DIR_OUT)/release
-DIR_RELEASE_PACKER := $(DIR_RELEASE)/packer/$(OS)/$(ARCH)
-DIR_RELEASE_PACKER_PLUGIN := $(DIR_RELEASE_PACKER)/plugins/github.com/hashicorp/amazon
-DIR_RELEASE_RUNTIME := $(DIR_RELEASE)/runtime
 
 DIR_TMPINSTALL_BTRFS_PROGS := btrfs-progs-tmpinstall
 DIR_TMPINSTALL_CHRONY := chrony-tmpinstall
@@ -26,15 +27,6 @@ DIR_TMPINSTALL_OPENSSL := openssl-tmpinstall
 DIR_TMPINSTALL_SUDO := sudo-tmpinstall
 DIR_TMPINSTALL_UTIL_LINUX := util-linux-tmpinstall
 DIR_TMPINSTALL_ZLIB := zlib-tmpinstall
-
-# This is used to clean up staging directories containing a $(DIR_ET)
-# subdirectory if that variable value changes. Since $(DIR_STG_BOOTLOADER)
-# does not have a $(DIR_ET) subdirectory, it is omitted here.
-DIRS_STG := $(DIR_STG_BASE) $(DIR_STG_CHRONY) $(DIR_STG_KERNEL) $(DIR_STG_SSH)
-
-DOCKERFILE_SHA256 := $(shell sha256sum Dockerfile.build | awk '{print $$1}' | cut -c 1-40)
-CTR_IMAGE_GO := golang:1.22.4-alpine3.20
-CTR_IMAGE_LOCAL := $(PROJECT):$(DOCKERFILE_SHA256)
 
 KERNEL_ORG := https://cdn.kernel.org/pub/linux
 
@@ -54,22 +46,6 @@ KERNEL_SRC := linux-$(KERNEL_VERSION)
 KERNEL_ARCHIVE := $(KERNEL_SRC).tar.xz
 KERNEL_URL := $(KERNEL_ORG)/kernel/v$(KERNEL_VERSION_MAJ).x/$(KERNEL_ARCHIVE)
 
-EXE_SUFFIX :=
-ifeq ($(OS), windows)
-	EXE_SUFFIX := .exe
-endif
-
-PACKER_VERSION := 1.9.4
-PACKER_ARCHIVE := packer_$(PACKER_VERSION)_$(OS)_$(ARCH).zip
-PACKER_URL := https://releases.hashicorp.com/packer/$(PACKER_VERSION)/$(PACKER_ARCHIVE)
-PACKER_EXE := packer$(EXE_SUFFIX)
-
-PACKER_PLUGIN_AMZ_VERSION := 1.2.6
-PACKER_PLUGIN_AMZ_NAME := packer-plugin-amazon_v$(PACKER_PLUGIN_AMZ_VERSION)_x5.0_$(OS)_$(ARCH)
-PACKER_PLUGIN_AMZ_ARCHIVE := $(PACKER_PLUGIN_AMZ_NAME).zip
-PACKER_PLUGIN_AMZ_URL := https://github.com/hashicorp/packer-plugin-amazon/releases/download/v$(PACKER_PLUGIN_AMZ_VERSION)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
-PACKER_PLUGIN_AMZ_EXE := $(PACKER_PLUGIN_AMZ_NAME)$(EXE_SUFFIX)
-
 SYSTEMD_BOOT_VERSION := 252.12-1~deb12u1
 SYSTEMD_BOOT_ARCHIVE := systemd-boot-efi_$(SYSTEMD_BOOT_VERSION)_amd64.deb
 SYSTEMD_BOOT_URL := https://snapshot.debian.org/archive/debian/20230712T091300Z/pool/main/s/systemd/$(SYSTEMD_BOOT_ARCHIVE)
@@ -83,7 +59,6 @@ CHRONY_VERSION := 4.5
 CHRONY_SRC := chrony-$(CHRONY_VERSION)
 CHRONY_ARCHIVE := $(CHRONY_SRC).tar.gz
 CHRONY_URL := https://chrony-project.org/releases/$(CHRONY_ARCHIVE)
-CHRONY_USER := cb-chrony
 
 BUSYBOX_VERSION := 1.35.0
 BUSYBOX_URL := https://www.busybox.net/downloads/binaries/$(BUSYBOX_VERSION)-x86_64-linux-musl/busybox
@@ -103,8 +78,6 @@ OPENSSH_VERSION := V_9_7_P1
 OPENSSH_SRC := openssh-portable-$(OPENSSH_VERSION)
 OPENSSH_ARCHIVE := $(OPENSSH_VERSION).tar.gz
 OPENSSH_URL := https://github.com/openssh/openssh-portable/archive/refs/tags/$(OPENSSH_ARCHIVE)
-OPENSSH_PRIVSEP_USER := cb-ssh
-OPENSSH_PRIVSEP_DIR := /$(DIR_ET)/var/empty
 OPENSSH_DEFAULT_PATH := /$(DIR_ET)/bin:/$(DIR_ET)/sbin:/bin:/usr/bin:/usr/local/bin
 
 SUDO_VERSION := 1.9.15p5
@@ -112,16 +85,14 @@ SUDO_SRC := sudo-$(SUDO_VERSION)
 SUDO_ARCHIVE := $(SUDO_SRC).tar.gz
 SUDO_URL := https://www.sudo.ws/dist/$(SUDO_ARCHIVE)
 
-VAR_DIR_ET := $(DIR_OUT)/.var-dir-et
-VAR_CTR_IMAGE_GO := $(DIR_OUT)/.var-ctr-image-go
+PACKER_ARCHIVE := packer_$(PACKER_VERSION)_$(OS)_$(ARCH).zip
+PACKER_URL := https://releases.hashicorp.com/packer/$(PACKER_VERSION)/$(PACKER_ARCHIVE)
 
-HAS_COMMAND_AR := $(DIR_OUT)/.command-ar
-HAS_COMMAND_CURL := $(DIR_OUT)/.command-curl
-HAS_COMMAND_DOCKER := $(DIR_OUT)/.command-docker
-HAS_COMMAND_FAKEROOT := $(DIR_OUT)/.command-fakeroot
-HAS_COMMAND_UNZIP := $(DIR_OUT)/.command-unzip
-HAS_COMMAND_XZCAT := $(DIR_OUT)/.command-xzcat
-HAS_IMAGE_LOCAL := $(DIR_OUT)/.image-local-$(DOCKERFILE_SHA256)
+PACKER_PLUGIN_AMZ_ARCHIVE := $(PACKER_PLUGIN_AMZ_NAME).zip
+PACKER_PLUGIN_AMZ_URL := https://github.com/hashicorp/packer-plugin-amazon/releases/download/v$(PACKER_PLUGIN_AMZ_VERSION)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
+
+PACKER_ASSETS = $(DIR_STG_PACKER)/$(PACKER_EXE) \
+	$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
 
 BTRFS_PROGS_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	$(DIR_OUT)/$(BTRFS_PROGS_SRC) \
@@ -180,41 +151,6 @@ ZLIB_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	hack/compile-zlib-ctr
 
 .DEFAULT_GOAL := release
-
-FORCE:
-
-# Create a file to depend on the contents of $(DIR_ET). Remove the staging
-# directory if it changes so the old $(DIR_ET) doesn't end up in release tarballs.
-$(VAR_DIR_ET): FORCE
-	@grep -qE "^$(DIR_ET)$$" $(VAR_DIR_ET) 2>/dev/null || { \
-		echo $(DIR_ET) > $(VAR_DIR_ET); \
-		rm -rf $(DIRS_STG); \
-	}
-
-$(VAR_CTR_IMAGE_GO): FORCE
-	@grep -qE "^$(CTR_IMAGE_GO)$$" $(VAR_CTR_IMAGE_GO) 2>/dev/null || \
-		echo $(CTR_IMAGE_GO) > $(VAR_CTR_IMAGE_GO)
-
-# Create any directory under $(DIR_OUT) as long as it ends in a `/` character.
-$(DIR_OUT)/%/:
-	@[ -d $(DIR_OUT)/$* ] || mkdir -p $(DIR_OUT)/$*
-
-# Create empty file `$(DIR_OUT)/.command-abc` if command `abc` is found.
-$(DIR_OUT)/.command-%:
-	@[ -d $(DIR_OUT) ] || mkdir -p $(DIR_OUT)
-	@which $* 2>&1 >/dev/null && touch $(DIR_OUT)/.command-$* || (echo "$* is required"; exit 1)
-
-# Container image build is done in empty $(DIR_OUT)/dockerbuild directory to speed it up.
-$(DIR_OUT)/.image-local-$(DOCKERFILE_SHA256): $(HAS_COMMAND_DOCKER) $(VAR_CTR_IMAGE_GO)
-	@$(MAKE) $(DIR_OUT)/dockerbuild/
-	@docker build \
-		--build-arg FROM=$(CTR_IMAGE_GO) \
-		--build-arg GID=$$(id -g) \
-		--build-arg UID=$$(id -u) \
-		-f $(DIR_ROOT)/Dockerfile.build \
-		-t $(CTR_IMAGE_LOCAL) \
-		$(DIR_OUT)/dockerbuild
-	@touch $(HAS_IMAGE_LOCAL)
 
 $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE): $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE) $(BTRFS_PROGS_URL)
@@ -479,7 +415,7 @@ $(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen: $(VAR_DIR_ET) \
 
 $(DIR_STG_SSH)/$(DIR_ET)/bin/sudo: $(VAR_DIR_ET) \
 		$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/bin/
+	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/bin/
 	@install -m 4511 $(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo
 
@@ -489,7 +425,7 @@ $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config: files/etc/ssh/sshd_config $(VAR_DI
 	@chmod 0600 $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config
 
 $(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers: files/etc/sudoers $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/etc/
+	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/etc/
 	@install -m 0440 files/etc/sudoers $(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers
 
 $(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server: $(VAR_DIR_ET) \
@@ -507,12 +443,7 @@ $(DIR_STG_SSH)/$(DIR_ET)/services/ssh: $(VAR_DIR_ET)
 	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/services/
 	@touch $(DIR_STG_SSH)/$(DIR_ET)/services/ssh
 
-$(DIR_RELEASE_RUNTIME)/boot.tar: $(HAS_COMMAND_FAKEROOT) $(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI
-	@$(MAKE) $(DIR_RELEASE_RUNTIME)/ $(DIR_STG_BOOTLOADER)/boot/loader/entries/
-	@chmod -R 0755 $(DIR_STG_BOOTLOADER)
-	@cd $(DIR_STG_BOOTLOADER) && fakeroot tar cf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/boot.tar .
-
-$(DIR_RELEASE_RUNTIME)/base.tar: \
+$(DIR_STG_RUNTIME)/base.tar: \
 		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/sh \
@@ -525,24 +456,29 @@ $(DIR_RELEASE_RUNTIME)/base.tar: \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext3 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext4 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs
-	@$(MAKE) $(DIR_RELEASE_RUNTIME)/
-	@cd $(DIR_STG_BASE) && fakeroot tar cf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/base.tar .
+	@$(MAKE) $(DIR_STG_RUNTIME)/
+	@cd $(DIR_STG_BASE) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/base.tar .
 
-$(DIR_RELEASE_RUNTIME)/chrony.tar: \
+$(DIR_STG_RUNTIME)/boot.tar: $(HAS_COMMAND_FAKEROOT) $(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI
+	@$(MAKE) $(DIR_STG_RUNTIME)/ $(DIR_STG_BOOTLOADER)/boot/loader/entries/
+	@chmod -R 0755 $(DIR_STG_BOOTLOADER)
+	@cd $(DIR_STG_BOOTLOADER) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/boot.tar .
+
+$(DIR_STG_RUNTIME)/chrony.tar: \
 		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/bin/chronyc \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/sbin/chronyd \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony
-	@$(MAKE) $(DIR_RELEASE_RUNTIME)/
-	@cd $(DIR_STG_CHRONY) && fakeroot tar cf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/chrony.tar .
+	@$(MAKE) $(DIR_STG_RUNTIME)/
+	@cd $(DIR_STG_CHRONY) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/chrony.tar .
 
-$(DIR_RELEASE_RUNTIME)/kernel.tar: $(HAS_COMMAND_FAKEROOT) \
+$(DIR_STG_RUNTIME)/kernel.tar: $(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION)
-	@$(MAKE) $(DIR_RELEASE_RUNTIME)/
-	@cd $(DIR_STG_KERNEL) && fakeroot tar -cf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/kernel.tar .
+	@$(MAKE) $(DIR_STG_RUNTIME)/
+	@cd $(DIR_STG_KERNEL) && fakeroot tar -cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/kernel.tar .
 
-$(DIR_RELEASE_RUNTIME)/ssh.tar: \
+$(DIR_STG_RUNTIME)/ssh.tar: \
 		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen \
@@ -551,48 +487,56 @@ $(DIR_RELEASE_RUNTIME)/ssh.tar: \
 		$(DIR_STG_SSH)/$(DIR_ET)/services/ssh \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo \
 		$(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers
-	@$(MAKE) $(DIR_RELEASE_RUNTIME)/
-	@cd $(DIR_STG_SSH) && fakeroot tar cpf $(DIR_ROOT)/$(DIR_RELEASE_RUNTIME)/ssh.tar .
+	@$(MAKE) $(DIR_STG_RUNTIME)/
+	@cd $(DIR_STG_SSH) && fakeroot tar cpf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/ssh.tar .
 
-PACKER_ASSETS = $(DIR_RELEASE_PACKER)/$(PACKER_EXE) \
-	$(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
+$(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz: \
+		Makefile.inc \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_RELEASE)/
+	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
+	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
+	@fakeroot tar -cz \
+		--xform "s|^|$(PROJECT)-build-$(VERSION)/|" \
+		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz ./Makefile.inc
 
 $(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: $(HAS_COMMAND_FAKEROOT) \
 		$(PACKER_ASSETS)
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
-	@cd $(DIR_RELEASE_PACKER) && \
+	@cd $(DIR_STG_PACKER) && \
 		fakeroot tar -cz \
 		--xform "s|^|$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz .
 
 $(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: $(HAS_COMMAND_FAKEROOT) \
-		$(DIR_RELEASE_RUNTIME)/base.tar \
-		$(DIR_RELEASE_RUNTIME)/boot.tar \
-		$(DIR_RELEASE_RUNTIME)/chrony.tar \
-		$(DIR_RELEASE_RUNTIME)/ssh.tar \
-		$(DIR_RELEASE_RUNTIME)/kernel.tar
+		$(DIR_STG_RUNTIME)/base.tar \
+		$(DIR_STG_RUNTIME)/boot.tar \
+		$(DIR_STG_RUNTIME)/chrony.tar \
+		$(DIR_STG_RUNTIME)/ssh.tar \
+		$(DIR_STG_RUNTIME)/kernel.tar
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
-	@cd $(DIR_RELEASE_RUNTIME) && \
+	@cd $(DIR_STG_RUNTIME) && \
 		fakeroot tar -cz \
 		--xform "s|^|$(PROJECT)-runtime-$(VERSION)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz .
 
-$(DIR_RELEASE_PACKER)/$(PACKER_EXE): $(HAS_COMMAND_UNZIP) $(DIR_OUT)/$(PACKER_ARCHIVE)
-	@$(MAKE) $(DIR_RELEASE_PACKER)/
-	@unzip -o $(DIR_OUT)/$(PACKER_ARCHIVE) -d $(DIR_RELEASE_PACKER)
-	@touch $(DIR_RELEASE_PACKER)/$(PACKER_EXE)
+$(DIR_STG_PACKER)/$(PACKER_EXE): $(HAS_COMMAND_UNZIP) $(DIR_OUT)/$(PACKER_ARCHIVE)
+	@$(MAKE) $(DIR_STG_PACKER)/
+	@unzip -o $(DIR_OUT)/$(PACKER_ARCHIVE) -d $(DIR_STG_PACKER)
+	@touch $(DIR_STG_PACKER)/$(PACKER_EXE)
 
-$(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: $(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
-	@sha256sum $(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) | \
-		awk '{print $$1}' > $(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+	@sha256sum $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) | \
+		awk '{print $$1}' > $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
 
-$(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): $(HAS_COMMAND_UNZIP) \
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): $(HAS_COMMAND_UNZIP) \
 		$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
-	@$(MAKE) $(DIR_RELEASE_PACKER_PLUGIN)/
-	@unzip -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) -d $(DIR_RELEASE_PACKER_PLUGIN)
-	@touch $(DIR_RELEASE_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+	@$(MAKE) $(DIR_STG_PACKER_PLUGIN)/
+	@unzip -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) -d $(DIR_STG_PACKER_PLUGIN)
+	@touch $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+
+release-build: $(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz
 
 release-packer-one: $(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz
 
@@ -611,7 +555,7 @@ release-packer: release-packer-linux-amd64 release-packer-linux-arm64 \
 
 release-runtime: $(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz
 
-release: release-packer release-runtime
+release: release-build release-packer release-runtime
 
 clean:
 	@chmod -R +w $(DIR_OUT)/go
