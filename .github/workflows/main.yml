@@ -13,6 +13,21 @@ jobs:
               exit
           fi
           echo "version=v0.0.0-$(mktemp -u XXXXXXXX)" >> ${GITHUB_OUTPUT}
+
+  build-build:
+    runs-on: ubuntu-24.04
+    needs:
+      - gen-version
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          VERSION: ${{ needs.gen-version.outputs.version }}
+        run: make release-build VERSION=${VERSION}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: _output/release/easyto-assets-build-*.tar.gz
+
   build-packer:
     runs-on: ubuntu-24.04
     strategy:
@@ -33,6 +48,7 @@ jobs:
         with:
           name: packer-${{ matrix.os }}-${{ matrix.arch }}
           path: _output/release/easyto-assets-packer-*.tar.gz
+
   build-runtime:
     runs-on: ubuntu-24.04
     needs:
@@ -46,11 +62,13 @@ jobs:
         with:
           name: runtime
           path: _output/release/easyto-assets-runtime-*.tar.gz
+
   release:
     runs-on: ubuntu-24.04
     if: github.ref_type == 'tag'
     needs:
       - gen-version
+      - build-build
       - build-packer
       - build-runtime
     steps:
