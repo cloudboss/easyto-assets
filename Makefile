@@ -17,79 +17,79 @@ DIRS_STG_CLEAN = $(DIR_STG_BASE) $(DIR_STG_CHRONY) $(DIR_STG_KERNEL) $(DIR_STG_S
 
 include Makefile.inc
 
-DIR_RELEASE := $(DIR_OUT)/release
+DIR_RELEASE = $(DIR_OUT)/release
 
-DIR_TMPINSTALL_BTRFS_PROGS := btrfs-progs-tmpinstall
-DIR_TMPINSTALL_CHRONY := chrony-tmpinstall
-DIR_TMPINSTALL_E2FSPROGS := e2fsprogs-tmpinstall
-DIR_TMPINSTALL_OPENSSH := openssh-tmpinstall
-DIR_TMPINSTALL_OPENSSL := openssl-tmpinstall
-DIR_TMPINSTALL_SUDO := sudo-tmpinstall
-DIR_TMPINSTALL_UTIL_LINUX := util-linux-tmpinstall
-DIR_TMPINSTALL_ZLIB := zlib-tmpinstall
+DIR_TMPINSTALL_BTRFS_PROGS = btrfs-progs-tmpinstall
+DIR_TMPINSTALL_CHRONY = chrony-tmpinstall
+DIR_TMPINSTALL_E2FSPROGS = e2fsprogs-tmpinstall
+DIR_TMPINSTALL_OPENSSH = openssh-tmpinstall
+DIR_TMPINSTALL_OPENSSL = openssl-tmpinstall
+DIR_TMPINSTALL_SUDO = sudo-tmpinstall
+DIR_TMPINSTALL_UTIL_LINUX = util-linux-tmpinstall
+DIR_TMPINSTALL_ZLIB = zlib-tmpinstall
 
-KERNEL_ORG := https://cdn.kernel.org/pub/linux
+KERNEL_ORG = https://cdn.kernel.org/pub/linux
 
-BTRFS_PROGS_VERSION := 6.5.2
-BTRFS_PROGS_SRC := btrfs-progs-v$(BTRFS_PROGS_VERSION)
-BTRFS_PROGS_ARCHIVE := $(BTRFS_PROGS_SRC).tar.xz
-BTRFS_PROGS_URL := $(KERNEL_ORG)/kernel/people/kdave/btrfs-progs/$(BTRFS_PROGS_ARCHIVE)
+BTRFS_PROGS_VERSION = 6.5.2
+BTRFS_PROGS_SRC = btrfs-progs-v$(BTRFS_PROGS_VERSION)
+BTRFS_PROGS_ARCHIVE = $(BTRFS_PROGS_SRC).tar.xz
+BTRFS_PROGS_URL = $(KERNEL_ORG)/kernel/people/kdave/btrfs-progs/$(BTRFS_PROGS_ARCHIVE)
 
-E2FSPROGS_VERSION := 1.47.0
-E2FSPROGS_SRC := e2fsprogs-$(E2FSPROGS_VERSION)
-E2FSPROGS_ARCHIVE := $(E2FSPROGS_SRC).tar.gz
-E2FSPROGS_URL := $(KERNEL_ORG)/kernel/people/tytso/e2fsprogs/v$(E2FSPROGS_VERSION)/$(E2FSPROGS_ARCHIVE)
+E2FSPROGS_VERSION = 1.47.0
+E2FSPROGS_SRC = e2fsprogs-$(E2FSPROGS_VERSION)
+E2FSPROGS_ARCHIVE = $(E2FSPROGS_SRC).tar.gz
+E2FSPROGS_URL = $(KERNEL_ORG)/kernel/people/tytso/e2fsprogs/v$(E2FSPROGS_VERSION)/$(E2FSPROGS_ARCHIVE)
 
-KERNEL_VERSION := 6.6.29
-KERNEL_VERSION_MAJ := $(shell echo $(KERNEL_VERSION) | cut -c 1)
-KERNEL_SRC := linux-$(KERNEL_VERSION)
-KERNEL_ARCHIVE := $(KERNEL_SRC).tar.xz
-KERNEL_URL := $(KERNEL_ORG)/kernel/v$(KERNEL_VERSION_MAJ).x/$(KERNEL_ARCHIVE)
+KERNEL_VERSION = 6.6.29
+KERNEL_VERSION_MAJ = $(shell echo $(KERNEL_VERSION) | cut -c 1)
+KERNEL_SRC = linux-$(KERNEL_VERSION)
+KERNEL_ARCHIVE = $(KERNEL_SRC).tar.xz
+KERNEL_URL = $(KERNEL_ORG)/kernel/v$(KERNEL_VERSION_MAJ).x/$(KERNEL_ARCHIVE)
 
-SYSTEMD_BOOT_VERSION := 252.12-1~deb12u1
-SYSTEMD_BOOT_ARCHIVE := systemd-boot-efi_$(SYSTEMD_BOOT_VERSION)_amd64.deb
-SYSTEMD_BOOT_URL := https://snapshot.debian.org/archive/debian/20230712T091300Z/pool/main/s/systemd/$(SYSTEMD_BOOT_ARCHIVE)
+SYSTEMD_BOOT_VERSION = 252.12-1~deb12u1
+SYSTEMD_BOOT_ARCHIVE = systemd-boot-efi_$(SYSTEMD_BOOT_VERSION)_amd64.deb
+SYSTEMD_BOOT_URL = https://snapshot.debian.org/archive/debian/20230712T091300Z/pool/main/s/systemd/$(SYSTEMD_BOOT_ARCHIVE)
 
-UTIL_LINUX_VERSION := 2.39
-UTIL_LINUX_SRC := util-linux-$(UTIL_LINUX_VERSION)
-UTIL_LINUX_ARCHIVE := $(UTIL_LINUX_SRC).tar.gz
-UTIL_LINUX_URL := $(KERNEL_ORG)/utils/util-linux/v$(UTIL_LINUX_VERSION)/$(UTIL_LINUX_ARCHIVE)
+UTIL_LINUX_VERSION = 2.39
+UTIL_LINUX_SRC = util-linux-$(UTIL_LINUX_VERSION)
+UTIL_LINUX_ARCHIVE = $(UTIL_LINUX_SRC).tar.gz
+UTIL_LINUX_URL = $(KERNEL_ORG)/utils/util-linux/v$(UTIL_LINUX_VERSION)/$(UTIL_LINUX_ARCHIVE)
 
-CHRONY_VERSION := 4.5
-CHRONY_SRC := chrony-$(CHRONY_VERSION)
-CHRONY_ARCHIVE := $(CHRONY_SRC).tar.gz
-CHRONY_URL := https://chrony-project.org/releases/$(CHRONY_ARCHIVE)
+CHRONY_VERSION = 4.5
+CHRONY_SRC = chrony-$(CHRONY_VERSION)
+CHRONY_ARCHIVE = $(CHRONY_SRC).tar.gz
+CHRONY_URL = https://chrony-project.org/releases/$(CHRONY_ARCHIVE)
 
-BUSYBOX_VERSION := 1.35.0
-BUSYBOX_URL := https://www.busybox.net/downloads/binaries/$(BUSYBOX_VERSION)-x86_64-linux-musl/busybox
-BUSYBOX_BIN := busybox-$(BUSYBOX_VERSION)
+BUSYBOX_VERSION = 1.35.0
+BUSYBOX_URL = https://www.busybox.net/downloads/binaries/$(BUSYBOX_VERSION)-x86_64-linux-musl/busybox
+BUSYBOX_BIN = busybox-$(BUSYBOX_VERSION)
 
-ZLIB_VERSION := 1.3.1
-ZLIB_SRC := zlib-$(ZLIB_VERSION)
-ZLIB_ARCHIVE := $(ZLIB_SRC).tar.gz
-ZLIB_URL := https://zlib.net/$(ZLIB_ARCHIVE)
+ZLIB_VERSION = 1.3.1
+ZLIB_SRC = zlib-$(ZLIB_VERSION)
+ZLIB_ARCHIVE = $(ZLIB_SRC).tar.gz
+ZLIB_URL = https://zlib.net/$(ZLIB_ARCHIVE)
 
-OPENSSL_VERSION := 3.2.1
-OPENSSL_SRC := openssl-$(OPENSSL_VERSION)
-OPENSSL_ARCHIVE := $(OPENSSL_SRC).tar.gz
-OPENSSL_URL := https://www.openssl.org/source/$(OPENSSL_ARCHIVE)
+OPENSSL_VERSION = 3.2.1
+OPENSSL_SRC = openssl-$(OPENSSL_VERSION)
+OPENSSL_ARCHIVE = $(OPENSSL_SRC).tar.gz
+OPENSSL_URL = https://www.openssl.org/source/$(OPENSSL_ARCHIVE)
 
-OPENSSH_VERSION := V_9_7_P1
-OPENSSH_SRC := openssh-portable-$(OPENSSH_VERSION)
-OPENSSH_ARCHIVE := $(OPENSSH_VERSION).tar.gz
-OPENSSH_URL := https://github.com/openssh/openssh-portable/archive/refs/tags/$(OPENSSH_ARCHIVE)
-OPENSSH_DEFAULT_PATH := /$(DIR_ET)/bin:/$(DIR_ET)/sbin:/bin:/usr/bin:/usr/local/bin
+OPENSSH_VERSION = V_9_7_P1
+OPENSSH_SRC = openssh-portable-$(OPENSSH_VERSION)
+OPENSSH_ARCHIVE = $(OPENSSH_VERSION).tar.gz
+OPENSSH_URL = https://github.com/openssh/openssh-portable/archive/refs/tags/$(OPENSSH_ARCHIVE)
+OPENSSH_DEFAULT_PATH = /$(DIR_ET)/bin:/$(DIR_ET)/sbin:/bin:/usr/bin:/usr/local/bin
 
-SUDO_VERSION := 1.9.15p5
-SUDO_SRC := sudo-$(SUDO_VERSION)
-SUDO_ARCHIVE := $(SUDO_SRC).tar.gz
-SUDO_URL := https://www.sudo.ws/dist/$(SUDO_ARCHIVE)
+SUDO_VERSION = 1.9.15p5
+SUDO_SRC = sudo-$(SUDO_VERSION)
+SUDO_ARCHIVE = $(SUDO_SRC).tar.gz
+SUDO_URL = https://www.sudo.ws/dist/$(SUDO_ARCHIVE)
 
-PACKER_ARCHIVE := packer_$(PACKER_VERSION)_$(OS)_$(ARCH).zip
-PACKER_URL := https://releases.hashicorp.com/packer/$(PACKER_VERSION)/$(PACKER_ARCHIVE)
+PACKER_ARCHIVE = packer_$(PACKER_VERSION)_$(OS)_$(ARCH).zip
+PACKER_URL = https://releases.hashicorp.com/packer/$(PACKER_VERSION)/$(PACKER_ARCHIVE)
 
-PACKER_PLUGIN_AMZ_ARCHIVE := $(PACKER_PLUGIN_AMZ_NAME).zip
-PACKER_PLUGIN_AMZ_URL := https://github.com/hashicorp/packer-plugin-amazon/releases/download/v$(PACKER_PLUGIN_AMZ_VERSION)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
+PACKER_PLUGIN_AMZ_ARCHIVE = $(PACKER_PLUGIN_AMZ_NAME).zip
+PACKER_PLUGIN_AMZ_URL = https://github.com/hashicorp/packer-plugin-amazon/releases/download/v$(PACKER_PLUGIN_AMZ_VERSION)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
 
 PACKER_ASSETS = $(DIR_STG_PACKER)/$(PACKER_EXE) \
 	$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
@@ -150,7 +150,7 @@ ZLIB_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	$(DIR_OUT)/$(ZLIB_SRC) \
 	hack/compile-zlib-ctr
 
-.DEFAULT_GOAL := release
+.DEFAULT_GOAL = release
 
 $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE): $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE) $(BTRFS_PROGS_URL)
