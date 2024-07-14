@@ -152,46 +152,46 @@ ZLIB_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 
 .DEFAULT_GOAL = release
 
-$(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE) $(BTRFS_PROGS_URL)
 
-$(DIR_OUT)/$(CHRONY_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(CHRONY_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(CHRONY_ARCHIVE) $(CHRONY_URL)
 
-$(DIR_OUT)/$(E2FSPROGS_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(E2FSPROGS_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(E2FSPROGS_ARCHIVE) $(E2FSPROGS_URL)
 
-$(DIR_OUT)/$(KERNEL_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(KERNEL_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(KERNEL_ARCHIVE) $(KERNEL_URL)
 
-$(DIR_OUT)/$(OPENSSH_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(OPENSSH_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(OPENSSH_ARCHIVE) $(OPENSSH_URL)
 
-$(DIR_OUT)/$(OPENSSL_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(OPENSSL_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(OPENSSL_ARCHIVE) $(OPENSSL_URL)
 
-$(DIR_OUT)/$(PACKER_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(PACKER_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(PACKER_ARCHIVE) $(PACKER_URL)
 
-$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) $(PACKER_PLUGIN_AMZ_URL)
 
-$(DIR_OUT)/$(SUDO_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(SUDO_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(SUDO_ARCHIVE) $(SUDO_URL)
 
-$(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE) $(SYSTEMD_BOOT_URL)
 
-$(DIR_OUT)/$(UTIL_LINUX_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(UTIL_LINUX_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE) $(UTIL_LINUX_URL)
 
-$(DIR_OUT)/$(ZLIB_ARCHIVE): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(ZLIB_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(ZLIB_ARCHIVE) $(ZLIB_URL)
 
-$(DIR_OUT)/$(BUSYBOX_BIN): $(HAS_COMMAND_CURL)
+$(DIR_OUT)/$(BUSYBOX_BIN): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(BUSYBOX_BIN) $(BUSYBOX_URL)
 
-$(DIR_OUT)/$(BTRFS_PROGS_SRC): $(HAS_COMMAND_XZCAT) $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE)
+$(DIR_OUT)/$(BTRFS_PROGS_SRC): | $(HAS_COMMAND_XZCAT) $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE)
 	@xzcat $(DIR_OUT)/$(BTRFS_PROGS_ARCHIVE) | tar xf - -C $(DIR_OUT)
 
 $(DIR_OUT)/$(CHRONY_SRC): $(DIR_OUT)/$(CHRONY_ARCHIVE)
@@ -200,7 +200,7 @@ $(DIR_OUT)/$(CHRONY_SRC): $(DIR_OUT)/$(CHRONY_ARCHIVE)
 $(DIR_OUT)/$(E2FSPROGS_SRC): $(DIR_OUT)/$(E2FSPROGS_ARCHIVE)
 	@tar zxmf $(DIR_OUT)/$(E2FSPROGS_ARCHIVE) -C $(DIR_OUT)
 
-$(DIR_OUT)/$(KERNEL_SRC): $(HAS_COMMAND_XZCAT) $(DIR_OUT)/$(KERNEL_ARCHIVE)
+$(DIR_OUT)/$(KERNEL_SRC): $(DIR_OUT)/$(KERNEL_ARCHIVE) | $(HAS_COMMAND_XZCAT)
 	@xzcat $(DIR_OUT)/$(KERNEL_ARCHIVE) | tar xf - -C $(DIR_OUT)
 
 $(DIR_OUT)/$(OPENSSH_SRC): $(DIR_OUT)/$(OPENSSH_ARCHIVE)
@@ -218,8 +218,9 @@ $(DIR_OUT)/$(UTIL_LINUX_SRC): $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE)
 $(DIR_OUT)/$(ZLIB_SRC): $(DIR_OUT)/$(ZLIB_ARCHIVE)
 	@tar zxmf $(DIR_OUT)/$(ZLIB_ARCHIVE) -C $(DIR_OUT)
 
-$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static: $(BTRFS_PROGS_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/
+$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static: \
+		$(BTRFS_PROGS_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(BTRFS_PROGS_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS):/$(DIR_TMPINSTALL_BTRFS_PROGS) \
@@ -231,8 +232,9 @@ $(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static: $(BTRFS_PROGS_BU
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-btrfsprogs-ctr)"
 
-$(CHRONY_BUILD_OUT) &: $(CHRONY_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/$(DIR_ET)/
+$(CHRONY_BUILD_OUT) &: \
+		$(CHRONY_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/$(DIR_ET)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(CHRONY_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY):/$(DIR_TMPINSTALL_CHRONY) \
@@ -245,8 +247,9 @@ $(CHRONY_BUILD_OUT) &: $(CHRONY_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-chrony-ctr)"
 
-$(E2FSPROGS_BUILD_OUT) &: $(E2FSPROGS_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/
+$(E2FSPROGS_BUILD_OUT) &: \
+		$(E2FSPROGS_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(E2FSPROGS_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS):/$(DIR_TMPINSTALL_E2FSPROGS) \
@@ -254,8 +257,9 @@ $(E2FSPROGS_BUILD_OUT) &: $(E2FSPROGS_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-e2fsprogs-ctr)"
 
-$(OPENSSH_BUILD_OUT) &: $(OPENSSH_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/
+$(OPENSSH_BUILD_OUT) &: \
+		$(OPENSSH_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(OPENSSH_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH):/$(DIR_TMPINSTALL_OPENSSH) \
@@ -271,8 +275,9 @@ $(OPENSSH_BUILD_OUT) &: $(OPENSSH_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-openssh-ctr)"
 
-$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL)/lib/libcrypto.a: $(OPENSSL_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL)/
+$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL)/lib/libcrypto.a: \
+		$(OPENSSL_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(OPENSSL_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL):/$(DIR_TMPINSTALL_OPENSSL) \
@@ -280,8 +285,9 @@ $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL)/lib/libcrypto.a: $(OPENSSL_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-openssl-ctr)"
 
-$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo: $(SUDO_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/$(DIR_ET)/run/
+$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo: \
+		$(SUDO_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/$(DIR_ET)/run/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(SUDO_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO):/$(DIR_TMPINSTALL_SUDO) \
@@ -291,8 +297,9 @@ $(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo: $(SUDO_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-sudo-ctr)"
 
-$(UTIL_LINUX_BUILD_OUT) &: $(UTIL_LINUX_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/
+$(UTIL_LINUX_BUILD_OUT) &: \
+		$(UTIL_LINUX_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(UTIL_LINUX_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX):/$(DIR_TMPINSTALL_UTIL_LINUX) \
@@ -303,8 +310,9 @@ $(UTIL_LINUX_BUILD_OUT) &: $(UTIL_LINUX_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-util-linux-ctr)"
 
-$(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/lib/libz.a: $(ZLIB_BUILD_DEPS)
-	@$(MAKE) $(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/
+$(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/lib/libz.a: \
+		$(ZLIB_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(ZLIB_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB):/$(DIR_TMPINSTALL_ZLIB) \
@@ -312,79 +320,89 @@ $(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/lib/libz.a: $(ZLIB_BUILD_DEPS)
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-zlib-ctr)"
 
-$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox: $(DIR_OUT)/$(BUSYBOX_BIN) $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/bin/
+$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox: \
+		$(DIR_OUT)/$(BUSYBOX_BIN) \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/bin/
 	@install -m 0755 $(DIR_OUT)/$(BUSYBOX_BIN) $(DIR_STG_BASE)/$(DIR_ET)/bin/busybox
 
-$(DIR_STG_BASE)/$(DIR_ET)/bin/sh: files/bin/sh $(DIR_STG_BASE)/$(DIR_ET)/bin/busybox $(VAR_DIR_ET)
+$(DIR_STG_BASE)/$(DIR_ET)/bin/sh: \
+		files/bin/sh \
+		$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox \
+		| $(VAR_DIR_ET)
 	@sed "s|__DIR_ET__|/${DIR_ET}|g" files/bin/sh > $(DIR_STG_BASE)/$(DIR_ET)/bin/sh
 	@chmod 0755 $(DIR_STG_BASE)/$(DIR_ET)/bin/sh
 
-$(DIR_STG_BASE)/$(DIR_ET)/etc/amazon.pem: files/etc/amazon.pem $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/etc/
+$(DIR_STG_BASE)/$(DIR_ET)/etc/amazon.pem: \
+		files/etc/amazon.pem \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/etc/
 	@install -m 0644 files/etc/amazon.pem $(DIR_STG_BASE)/$(DIR_ET)/etc/amazon.pem
 
-$(DIR_STG_BASE)/$(DIR_ET)/libexec/blkid: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/sbin/blkid.static
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/libexec/
+$(DIR_STG_BASE)/$(DIR_ET)/libexec/blkid: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/sbin/blkid.static \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/libexec/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/sbin/blkid.static \
 		$(DIR_STG_BASE)/$(DIR_ET)/libexec/blkid
 
-$(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid: $(DIR_STG_BASE)/$(DIR_ET)/libexec/blkid files/sbin/blkid
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid: \
+		$(DIR_STG_BASE)/$(DIR_ET)/libexec/blkid \
+		files/sbin/blkid \
+		| $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@sed "s|__DIR_ET__|/${DIR_ET}|g" files/sbin/blkid > $(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid
 	@chmod 0755 $(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid
 
-$(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/mke2fs
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/mke2fs \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/mke2fs \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs
 
-$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext%: $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext%: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs $(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext$*
 
-$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.btrfs: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.btrfs: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@install -m 0755 \
 		$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.btrfs
 
-$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs
-	@$(MAKE) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs
 
-$(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI: $(HAS_IMAGE_LOCAL) $(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE)
-	@$(MAKE) $(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/
+$(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI: \
+		$(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE) \
+		| $(HAS_IMAGE_LOCAL) $(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE):/$(SYSTEMD_BOOT_ARCHIVE) \
 		-v $(DIR_ROOT)/$(DIR_STG_BOOTLOADER):/staging \
 		-e SYSTEMD_BOOT_ARCHIVE=/$(SYSTEMD_BOOT_ARCHIVE) \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/extract-bootloader-ctr)"
 
-$(DIR_STG_CHRONY)/$(DIR_ET)/sbin/chronyd: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/sbin/chronyd
-	@$(MAKE) $(DIR_STG_CHRONY)/$(DIR_ET)/sbin/
+$(DIR_STG_CHRONY)/$(DIR_ET)/sbin/chronyd: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/sbin/chronyd \
+		| $(VAR_DIR_ET) $(DIR_STG_CHRONY)/$(DIR_ET)/sbin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/sbin/chronyd \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/sbin/chronyd
 
-$(DIR_STG_CHRONY)/$(DIR_ET)/bin/chronyc: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/bin/chronyc
-	@$(MAKE) $(DIR_STG_CHRONY)/$(DIR_ET)/bin/
+$(DIR_STG_CHRONY)/$(DIR_ET)/bin/chronyc: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/bin/chronyc \
+		| $(VAR_DIR_ET) $(DIR_STG_CHRONY)/$(DIR_ET)/bin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_CHRONY)/bin/chronyc \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/bin/chronyc
 
-$(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf: files/etc/chrony.conf $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_CHRONY)/$(DIR_ET)/etc/
+$(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf: \
+		files/etc/chrony.conf \
+		| $(VAR_DIR_ET) $(DIR_STG_CHRONY)/$(DIR_ET)/etc/
 	@sed "s|__DIR_ET__|/${DIR_ET}|g" files/etc/chrony.conf > $(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf
 	@chmod 0644 $(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf
 
-$(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony: $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_CHRONY)/$(DIR_ET)/services/
+$(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony: \
+		| $(VAR_DIR_ET) $(DIR_STG_CHRONY)/$(DIR_ET)/services/
 	@touch $(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony
 
 # Other files are created by the kernel build, but vmlinuz-$(KERNEL_VERSION) is used
@@ -393,8 +411,9 @@ $(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony: $(VAR_DIR_ET)
 # N.B. The kernel build target differs from others in that it installs directly into
 # the staging area, whereas the others install into a tmpinstall directory so select
 # files can be chosen to be put into the staging area.
-$(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION): $(KERNEL_BUILD_DEPS)
-	@$(MAKE) $(DIR_STG_KERNEL)/boot/ $(DIR_STG_KERNEL)/$(DIR_ET)/
+$(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION): \
+		$(KERNEL_BUILD_DEPS) \
+		| $(DIR_STG_KERNEL)/boot/ $(DIR_STG_KERNEL)/$(DIR_ET)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(KERNEL_SRC):/code \
 		-v $(DIR_ROOT)/$(DIR_STG_KERNEL):/install \
@@ -407,44 +426,46 @@ $(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION): $(KERNEL_BUILD_DEPS)
 	@rm -f $(DIR_STG_KERNEL)/$(DIR_ET)/lib/modules/$(KERNEL_VERSION)/build
 	@rm -f $(DIR_STG_KERNEL)/$(DIR_ET)/lib/modules/$(KERNEL_VERSION)/source
 
-$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/bin/
+$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/bin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen
 
-$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/bin/
+$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/bin/
 	@install -m 4511 $(DIR_OUT)/$(DIR_TMPINSTALL_SUDO)/bin/sudo \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo
 
-$(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config: files/etc/ssh/sshd_config $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/
+$(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config: \
+		files/etc/ssh/sshd_config \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/
 	@sed "s|__DIR_ET__|/${DIR_ET}|g" files/etc/ssh/sshd_config > $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config
 	@chmod 0600 $(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config
 
-$(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers: files/etc/sudoers $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/etc/
+$(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers: \
+		files/etc/sudoers \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/etc/
 	@install -m 0440 files/etc/sudoers $(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers
 
-$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server: $(VAR_DIR_ET) \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/libexec/
+$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/libexec/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server \
 		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server
 
-$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd: $(VAR_DIR_ET) $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/sbin/
+$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/sbin/
 	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
 		$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd
 
-$(DIR_STG_SSH)/$(DIR_ET)/services/ssh: $(VAR_DIR_ET)
-	@$(MAKE) $(DIR_STG_SSH)/$(DIR_ET)/services/
+$(DIR_STG_SSH)/$(DIR_ET)/services/ssh: \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/services/
 	@touch $(DIR_STG_SSH)/$(DIR_ET)/services/ssh
 
 $(DIR_STG_RUNTIME)/base.tar: \
-		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/sh \
 		$(DIR_STG_BASE)/$(DIR_ET)/etc/amazon.pem \
@@ -455,40 +476,39 @@ $(DIR_STG_RUNTIME)/base.tar: \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext2 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext3 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext4 \
-		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs
-	@$(MAKE) $(DIR_STG_RUNTIME)/
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/
 	@cd $(DIR_STG_BASE) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/base.tar .
 
-$(DIR_STG_RUNTIME)/boot.tar: $(HAS_COMMAND_FAKEROOT) $(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI
-	@$(MAKE) $(DIR_STG_RUNTIME)/ $(DIR_STG_BOOTLOADER)/boot/loader/entries/
+$(DIR_STG_RUNTIME)/boot.tar: \
+		$(DIR_STG_BOOTLOADER)/boot/EFI/BOOT/BOOTX64.EFI \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/ $(DIR_STG_BOOTLOADER)/boot/loader/entries/
 	@chmod -R 0755 $(DIR_STG_BOOTLOADER)
 	@cd $(DIR_STG_BOOTLOADER) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/boot.tar .
 
 $(DIR_STG_RUNTIME)/chrony.tar: \
-		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/bin/chronyc \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/etc/chrony.conf \
 		$(DIR_STG_CHRONY)/$(DIR_ET)/sbin/chronyd \
-		$(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony
-	@$(MAKE) $(DIR_STG_RUNTIME)/
+		$(DIR_STG_CHRONY)/$(DIR_ET)/services/chrony \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/
 	@cd $(DIR_STG_CHRONY) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/chrony.tar .
 
-$(DIR_STG_RUNTIME)/kernel.tar: $(HAS_COMMAND_FAKEROOT) \
-		$(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION)
-	@$(MAKE) $(DIR_STG_RUNTIME)/
+$(DIR_STG_RUNTIME)/kernel.tar: \
+		$(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION) \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/
 	@cd $(DIR_STG_KERNEL) && fakeroot tar -cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/kernel.tar .
 
 $(DIR_STG_RUNTIME)/ssh.tar: \
-		$(HAS_COMMAND_FAKEROOT) \
 		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen \
 		$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd \
 		$(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config \
 		$(DIR_STG_SSH)/$(DIR_ET)/services/ssh \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/sudo \
-		$(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers
-	@$(MAKE) $(DIR_STG_RUNTIME)/
-	@cd $(DIR_STG_SSH) && fakeroot tar cpf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/ssh.tar .
+		$(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/
+	@cd $(DIR_STG_SSH) && fakeroot tar -cpf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/ssh.tar .
 
 $(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz: \
 		Makefile.inc \
@@ -499,8 +519,9 @@ $(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz: \
 		--xform "s|^|$(PROJECT)-build-$(VERSION)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz ./Makefile.inc
 
-$(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: $(HAS_COMMAND_FAKEROOT) \
-		$(PACKER_ASSETS)
+$(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: \
+		$(PACKER_ASSETS) \
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_PACKER)/ $(DIR_STG_PACKER_PLUGIN)/ $(DIR_RELEASE)/
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
 	@cd $(DIR_STG_PACKER) && \
@@ -508,12 +529,13 @@ $(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: $(HAS_COMMAND_
 		--xform "s|^|$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz .
 
-$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: $(HAS_COMMAND_FAKEROOT) \
+$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: \
 		$(DIR_STG_RUNTIME)/base.tar \
 		$(DIR_STG_RUNTIME)/boot.tar \
 		$(DIR_STG_RUNTIME)/chrony.tar \
 		$(DIR_STG_RUNTIME)/ssh.tar \
-		$(DIR_STG_RUNTIME)/kernel.tar
+		$(DIR_STG_RUNTIME)/kernel.tar \
+		| $(HAS_COMMAND_FAKEROOT)
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
 	@cd $(DIR_STG_RUNTIME) && \
@@ -521,18 +543,20 @@ $(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: $(HAS_COMMAND_FAKEROOT) \
 		--xform "s|^|$(PROJECT)-runtime-$(VERSION)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz .
 
-$(DIR_STG_PACKER)/$(PACKER_EXE): $(HAS_COMMAND_UNZIP) $(DIR_OUT)/$(PACKER_ARCHIVE)
-	@$(MAKE) $(DIR_STG_PACKER)/
+$(DIR_STG_PACKER)/$(PACKER_EXE): \
+		$(DIR_OUT)/$(PACKER_ARCHIVE) \
+		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER)/
 	@unzip -o $(DIR_OUT)/$(PACKER_ARCHIVE) -d $(DIR_STG_PACKER)
 	@touch $(DIR_STG_PACKER)/$(PACKER_EXE)
 
-$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: \
+		$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
 	@sha256sum $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) | \
 		awk '{print $$1}' > $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
 
-$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): $(HAS_COMMAND_UNZIP) \
-		$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
-	@$(MAKE) $(DIR_STG_PACKER_PLUGIN)/
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): \
+		$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) \
+		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER_PLUGIN)/
 	@unzip -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) -d $(DIR_STG_PACKER_PLUGIN)
 	@touch $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
 
