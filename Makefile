@@ -92,6 +92,7 @@ PACKER_PLUGIN_AMZ_ARCHIVE = $(PACKER_PLUGIN_AMZ_NAME).zip
 PACKER_PLUGIN_AMZ_URL = https://github.com/hashicorp/packer-plugin-amazon/releases/download/v$(PACKER_PLUGIN_AMZ_VERSION)/$(PACKER_PLUGIN_AMZ_ARCHIVE)
 
 PACKER_ASSETS = $(DIR_STG_PACKER)/$(PACKER_EXE) \
+	$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) \
 	$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
 
 BTRFS_PROGS_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
@@ -465,6 +466,23 @@ $(DIR_STG_SSH)/$(DIR_ET)/services/ssh: \
 		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/services/
 	@touch $(DIR_STG_SSH)/$(DIR_ET)/services/ssh
 
+$(DIR_STG_PACKER)/$(PACKER_EXE): \
+		$(DIR_OUT)/$(PACKER_ARCHIVE) \
+		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER)/
+	@unzip -o $(DIR_OUT)/$(PACKER_ARCHIVE) -d $(DIR_STG_PACKER)
+	@touch $(DIR_STG_PACKER)/$(PACKER_EXE)
+
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): \
+		$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) \
+		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER_PLUGIN)/
+	@unzip -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) -d $(DIR_STG_PACKER_PLUGIN)
+	@touch $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+
+$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: \
+		$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
+	@sha256sum $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) | \
+		awk '{print $$1}' > $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
+
 $(DIR_STG_RUNTIME)/base.tar: \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/busybox \
 		$(DIR_STG_BASE)/$(DIR_ET)/bin/sh \
@@ -521,7 +539,7 @@ $(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz: \
 
 $(DIR_RELEASE)/$(PROJECT)-packer-$(VERSION)-$(OS)-$(ARCH).tar.gz: \
 		$(PACKER_ASSETS) \
-		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_PACKER)/ $(DIR_STG_PACKER_PLUGIN)/ $(DIR_RELEASE)/
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_RELEASE)/
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
 	@cd $(DIR_STG_PACKER) && \
@@ -535,30 +553,13 @@ $(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz: \
 		$(DIR_STG_RUNTIME)/chrony.tar \
 		$(DIR_STG_RUNTIME)/ssh.tar \
 		$(DIR_STG_RUNTIME)/kernel.tar \
-		| $(HAS_COMMAND_FAKEROOT)
+		| $(HAS_COMMAND_FAKEROOT) $(DIR_RELEASE)/
 	@[ -n "$(VERSION)" ] || (echo "VERSION is required"; exit 1)
 	@[ $$(echo $(VERSION) | cut -c 1) = v ] || (echo "VERSION must begin with a 'v'"; exit 1)
 	@cd $(DIR_STG_RUNTIME) && \
 		fakeroot tar -cz \
 		--xform "s|^|$(PROJECT)-runtime-$(VERSION)/|" \
 		-f $(DIR_ROOT)/$(DIR_RELEASE)/$(PROJECT)-runtime-$(VERSION).tar.gz .
-
-$(DIR_STG_PACKER)/$(PACKER_EXE): \
-		$(DIR_OUT)/$(PACKER_ARCHIVE) \
-		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER)/
-	@unzip -o $(DIR_OUT)/$(PACKER_ARCHIVE) -d $(DIR_STG_PACKER)
-	@touch $(DIR_STG_PACKER)/$(PACKER_EXE)
-
-$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM: \
-		$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
-	@sha256sum $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE) | \
-		awk '{print $$1}' > $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)_SHA256SUM
-
-$(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE): \
-		$(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) \
-		| $(HAS_COMMAND_UNZIP) $(DIR_STG_PACKER_PLUGIN)/
-	@unzip -o $(DIR_OUT)/$(PACKER_PLUGIN_AMZ_ARCHIVE) -d $(DIR_STG_PACKER_PLUGIN)
-	@touch $(DIR_STG_PACKER_PLUGIN)/$(PACKER_PLUGIN_AMZ_EXE)
 
 release-build: $(DIR_RELEASE)/$(PROJECT)-build-$(VERSION).tar.gz
 
@@ -584,3 +585,8 @@ release: release-build release-packer release-runtime
 clean:
 	@chmod -R +w $(DIR_OUT)/go
 	@rm -rf $(DIR_OUT)
+
+.PHONY: release-build release-packer-one release-packer \
+	release-packer-linux-amd64 release-packer-linux-arm64 \
+	release-packer-darwin-amd64 release-packer-darwin-arm64 \
+	release-packer-windows-amd64 release-runtime release clean
