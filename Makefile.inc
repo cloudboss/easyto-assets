@@ -36,7 +36,7 @@ UID_SHA256 = $(shell echo -n $(UID) | sha256sum | awk '{print $$1}')
 GID_SHA256 = $(shell echo -n $(GID) | sha256sum | awk '{print $$1}')
 CTR_IMAGE_GO_SHA256 = $(shell echo -n $(CTR_IMAGE_GO) | sha256sum | awk '{print $$1}')
 DOCKERFILE_SHA256 = $(shell sha256sum Dockerfile.build | awk '{print $$1}')
-DOCKER_INPUTS_SHA256 = $(shell echo -n $(UID_SHA256)$(GID_SHA256)$(CTR_IMAGE_GO_SHA256)$(DOCKERFILE_SHA256) \
+DOCKER_INPUTS_SHA256 = $(shell echo -n $(UID_SHA256)$(GID_SHA256)$(CTR_IMAGE_GO_SHA256)$(DOCKERFILE_SHA256) | \
 	sha256sum | awk '{print $$1}' | cut -c 1-40)
 CTR_IMAGE_LOCAL = $(PROJECT):$(DOCKER_INPUTS_SHA256)
 HAS_IMAGE_LOCAL = $(DIR_OUT)/.image-local-$(DOCKER_INPUTS_SHA256)
