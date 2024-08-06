@@ -2,9 +2,18 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2024-08-06
+
+### Added
+
+- Add a changelog.
+- Add [kmod](https://github.com/kmod-project/kmod) to the base tarball to enable loading of kernel modules.
+
 ### Changed
 
 - Fix Makefile formatting and typo.
+- Use `antonyurchenko/git-release` GitHub action that integrates with the changelog.
+- Move the artifact builds into a common workflow.
 
 ## [0.2.0] - 2024-07-13
 
@@ -29,5 +38,6 @@
 
 Initial release
 
+[0.3.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.3.0
 [0.2.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.1.0
