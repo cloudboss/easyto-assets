@@ -29,6 +29,7 @@ RUN apk add \
     perl \
     python3 \
     tar \
+    xz-static \
     zlib-static \
     zstd-static
 
