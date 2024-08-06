@@ -22,6 +22,7 @@ DIR_RELEASE = $(DIR_OUT)/release
 DIR_TMPINSTALL_BTRFS_PROGS = btrfs-progs-tmpinstall
 DIR_TMPINSTALL_CHRONY = chrony-tmpinstall
 DIR_TMPINSTALL_E2FSPROGS = e2fsprogs-tmpinstall
+DIR_TMPINSTALL_KMOD = kmod-tmpinstall
 DIR_TMPINSTALL_OPENSSH = openssh-tmpinstall
 DIR_TMPINSTALL_OPENSSL = openssl-tmpinstall
 DIR_TMPINSTALL_SUDO = sudo-tmpinstall
@@ -45,6 +46,12 @@ KERNEL_VERSION_MAJ = $(shell echo $(KERNEL_VERSION) | cut -c 1)
 KERNEL_SRC = linux-$(KERNEL_VERSION)
 KERNEL_ARCHIVE = $(KERNEL_SRC).tar.xz
 KERNEL_URL = $(KERNEL_ORG)/kernel/v$(KERNEL_VERSION_MAJ).x/$(KERNEL_ARCHIVE)
+
+KMOD_VERSION = af21689dd0f1ef6f40d6ecc323885026a07486f9
+KMOD_VERSION_SHORT = $(shell echo $(KMOD_VERSION) | cut -c 1-7)
+KMOD_SRC = kmod-project-kmod-$(KMOD_VERSION_SHORT)
+KMOD_ARCHIVE = $(KMOD_SRC).tar.gz
+KMOD_URL = https://api.github.com/repos/kmod-project/kmod/tarball/$(KMOD_VERSION)
 
 SYSTEMD_BOOT_VERSION = 252.12-1~deb12u1
 SYSTEMD_BOOT_ARCHIVE = systemd-boot-efi_$(SYSTEMD_BOOT_VERSION)_amd64.deb
@@ -121,6 +128,18 @@ KERNEL_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	kernel/config \
 	hack/compile-kernel-ctr
 
+KMOD_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
+	$(DIR_OUT)/$(KMOD_SRC) \
+	hack/compile-kmod-ctr
+
+KMOD_STG_OUT = $(DIR_STG_BASE)/$(DIR_ET)/sbin/depmod \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/insmod \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/lsmod \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/modinfo \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/modprobe \
+	$(DIR_STG_BASE)/$(DIR_ET)/sbin/rmmod
+
 OPENSSH_BUILD_OUT = $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
 	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
 	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server
@@ -165,6 +184,9 @@ $(DIR_OUT)/$(E2FSPROGS_ARCHIVE): | $(HAS_COMMAND_CURL)
 $(DIR_OUT)/$(KERNEL_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(KERNEL_ARCHIVE) $(KERNEL_URL)
 
+$(DIR_OUT)/$(KMOD_ARCHIVE): | $(HAS_COMMAND_CURL)
+	@curl -L -o $(DIR_OUT)/$(KMOD_ARCHIVE) $(KMOD_URL)
+
 $(DIR_OUT)/$(OPENSSH_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(OPENSSH_ARCHIVE) $(OPENSSH_URL)
 
@@ -203,6 +225,9 @@ $(DIR_OUT)/$(E2FSPROGS_SRC): $(DIR_OUT)/$(E2FSPROGS_ARCHIVE)
 
 $(DIR_OUT)/$(KERNEL_SRC): $(DIR_OUT)/$(KERNEL_ARCHIVE) | $(HAS_COMMAND_XZCAT)
 	@xzcat $(DIR_OUT)/$(KERNEL_ARCHIVE) | tar xf - -C $(DIR_OUT)
+
+$(DIR_OUT)/$(KMOD_SRC): | $(DIR_OUT)/$(KMOD_ARCHIVE)
+	@tar zxmf $(DIR_OUT)/$(KMOD_ARCHIVE) -C $(DIR_OUT)
 
 $(DIR_OUT)/$(OPENSSH_SRC): $(DIR_OUT)/$(OPENSSH_ARCHIVE)
 	@tar zxmf $(DIR_OUT)/$(OPENSSH_ARCHIVE) -C $(DIR_OUT)
@@ -257,6 +282,17 @@ $(E2FSPROGS_BUILD_OUT) &: \
 		-e DIR_TMPINSTALL_E2FSPROGS=/$(DIR_TMPINSTALL_E2FSPROGS) \
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-e2fsprogs-ctr)"
+
+$(DIR_OUT)/$(DIR_TMPINSTALL_KMOD)/bin/kmod: \
+		$(KMOD_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_KMOD)/
+	@docker run --rm -t \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(KMOD_SRC):/code \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_KMOD):/$(DIR_TMPINSTALL_KMOD) \
+		-e DIR_MODULES=/$(DIR_ET)/lib/modules \
+		-e DIR_TMPINSTALL_KMOD=/$(DIR_TMPINSTALL_KMOD) \
+		-w /code \
+		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-kmod-ctr)"
 
 $(OPENSSH_BUILD_OUT) &: \
 		$(OPENSSH_BUILD_DEPS) \
@@ -350,6 +386,36 @@ $(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid: \
 		| $(DIR_STG_BASE)/$(DIR_ET)/sbin/
 	@sed "s|__DIR_ET__|/${DIR_ET}|g" files/sbin/blkid > $(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid
 	@chmod 0755 $(DIR_STG_BASE)/$(DIR_ET)/sbin/blkid
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_KMOD)/bin/kmod \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_KMOD)/bin/kmod \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/depmod: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/depmod
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/insmod: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/insmod
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/lsmod: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/lsmod
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/modinfo: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/modinfo
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/modprobe: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/modprobe
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/rmmod: \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod
+	@ln -f $(DIR_STG_BASE)/$(DIR_ET)/sbin/kmod $(DIR_STG_BASE)/$(DIR_ET)/sbin/rmmod
 
 $(DIR_STG_BASE)/$(DIR_ET)/sbin/mke2fs: \
 		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/mke2fs \
@@ -495,6 +561,7 @@ $(DIR_STG_RUNTIME)/base.tar: \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext3 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext4 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs \
+		$(KMOD_STG_OUT) \
 		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/
 	@cd $(DIR_STG_BASE) && fakeroot tar cf $(DIR_ROOT)/$(DIR_STG_RUNTIME)/base.tar .
 

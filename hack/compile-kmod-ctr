@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+export CFLAGS=-s
+export LDFLAGS=--static
+[ -f configure ] || ./autogen.sh
+./configure \
+    --disable-logging \
+    --disable-manpages \
+    --disable-silent-rules \
+    --disable-test-modules \
+    --enable-gtk-doc-html=no \
+    --prefix=${DIR_TMPINSTALL_KMOD} \
+    --with-module-directory=${DIR_MODULES} \
+    --with-xz
+make -j$(nproc)
+make -j$(nproc) install
