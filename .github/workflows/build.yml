@@ -1,0 +1,12 @@
+name: easyto-assets-build
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/common.yml
+    with:
+      version: v0.0.0
