@@ -1,4 +1,4 @@
-	PROJECT = $(shell basename ${PWD})
+PROJECT = $(shell basename ${PWD})
 OS = $(shell uname | tr [:upper:] [:lower:])
 ARCH = $(shell arch=$$(uname -m); [ "$${arch}" = "x86_64" ] && echo "amd64" || echo $${arch})
 VERSION =
