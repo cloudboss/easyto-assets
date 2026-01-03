@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-01-03
+
+### Changed
+
+- Updated kernel to 6.12.63
+- Removed CONFIG_IP_PNP from kernel config
+
 ## [0.4.0] - 2024-11-08
 
 ### Removed
@@ -44,6 +51,7 @@
 
 Initial release
 
+[0.5.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.0
 [0.4.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.4.0
 [0.3.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.3.0
 [0.2.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.2.0
