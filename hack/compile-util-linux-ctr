@@ -2,6 +2,13 @@
 
 set -e
 
+# Trick the build into running a no-op for automake-1.16,
+# which is not available in our Alpine image, nor is it
+# actually needed, though it tries to run it anyway.
+printf '#!/bin/sh\ntrue' > ${HOME}/automake-1.16
+chmod 755 ${HOME}/automake-1.16
+export PATH=${HOME}:${PATH}
+
 ./configure \
     --prefix=${DIR_TMPINSTALL_UTIL_LINUX} \
     --localstatedir=${LOCALSTATEDIR} \
