@@ -31,7 +31,7 @@ PACKER_PLUGIN_AMZ_EXE = $(PACKER_PLUGIN_AMZ_NAME)$(EXE_SUFFIX)
 # will be rebuilt if the hash changes, as the dependency file will change.
 UID = $(shell id -u)
 GID = $(shell id -g)
-CTR_IMAGE_GO = golang:1.22.4-alpine3.20
+CTR_IMAGE_GO = golang:1.25.5-alpine3.23
 UID_SHA256 = $(shell echo -n $(UID) | sha256sum | awk '{print $$1}')
 GID_SHA256 = $(shell echo -n $(GID) | sha256sum | awk '{print $$1}')
 CTR_IMAGE_GO_SHA256 = $(shell echo -n $(CTR_IMAGE_GO) | sha256sum | awk '{print $$1}')

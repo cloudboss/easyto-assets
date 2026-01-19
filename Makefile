@@ -31,12 +31,12 @@ DIR_TMPINSTALL_ZLIB = zlib-tmpinstall
 
 KERNEL_ORG = https://cdn.kernel.org/pub/linux
 
-BTRFS_PROGS_VERSION = 6.5.2
+BTRFS_PROGS_VERSION = 6.17.1
 BTRFS_PROGS_SRC = btrfs-progs-v$(BTRFS_PROGS_VERSION)
 BTRFS_PROGS_ARCHIVE = $(BTRFS_PROGS_SRC).tar.xz
 BTRFS_PROGS_URL = $(KERNEL_ORG)/kernel/people/kdave/btrfs-progs/$(BTRFS_PROGS_ARCHIVE)
 
-E2FSPROGS_VERSION = 1.47.0
+E2FSPROGS_VERSION = 1.47.3
 E2FSPROGS_SRC = e2fsprogs-$(E2FSPROGS_VERSION)
 E2FSPROGS_ARCHIVE = $(E2FSPROGS_SRC).tar.gz
 E2FSPROGS_URL = $(KERNEL_ORG)/kernel/people/tytso/e2fsprogs/v$(E2FSPROGS_VERSION)/$(E2FSPROGS_ARCHIVE)
@@ -57,7 +57,7 @@ SYSTEMD_BOOT_VERSION = 252.12-1~deb12u1
 SYSTEMD_BOOT_ARCHIVE = systemd-boot-efi_$(SYSTEMD_BOOT_VERSION)_amd64.deb
 SYSTEMD_BOOT_URL = https://snapshot.debian.org/archive/debian/20230712T091300Z/pool/main/s/systemd/$(SYSTEMD_BOOT_ARCHIVE)
 
-UTIL_LINUX_VERSION = 2.39
+UTIL_LINUX_VERSION = 2.41
 UTIL_LINUX_SRC = util-linux-$(UTIL_LINUX_VERSION)
 UTIL_LINUX_ARCHIVE = $(UTIL_LINUX_SRC).tar.gz
 UTIL_LINUX_URL = $(KERNEL_ORG)/utils/util-linux/v$(UTIL_LINUX_VERSION)/$(UTIL_LINUX_ARCHIVE)
@@ -87,7 +87,7 @@ OPENSSH_ARCHIVE = $(OPENSSH_VERSION).tar.gz
 OPENSSH_URL = https://github.com/openssh/openssh-portable/archive/refs/tags/$(OPENSSH_ARCHIVE)
 OPENSSH_DEFAULT_PATH = /$(DIR_ET)/bin:/$(DIR_ET)/sbin:/bin:/usr/bin:/usr/local/bin
 
-SUDO_VERSION = 1.9.15p5
+SUDO_VERSION = 1.9.17p2
 SUDO_SRC = sudo-$(SUDO_VERSION)
 SUDO_ARCHIVE = $(SUDO_SRC).tar.gz
 SUDO_URL = https://www.sudo.ws/dist/$(SUDO_ARCHIVE)
