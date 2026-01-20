@@ -2,7 +2,10 @@
 
 set -e
 
-diff /config .config || cp /config .config
+CONFIG_TMP=$(mktemp)
+
+sed "s|__DIR_ET__|${DIR_ET}|g" /config > ${CONFIG_TMP}
+diff -u ${CONFIG_TMP} .config || cp ${CONFIG_TMP} .config
 make olddefconfig
 make -j$(nproc)
 make -j$(nproc) modules_install INSTALL_MOD_STRIP=1

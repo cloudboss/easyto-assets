@@ -486,6 +486,7 @@ $(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION): \
 		-v $(DIR_ROOT)/$(DIR_STG_KERNEL):/install \
 		-v $(DIR_ROOT)/kernel/config:/config \
 		-v $(DIR_ROOT)/kernel/installkernel:/sbin/installkernel \
+		-e DIR_ET=/$(DIR_ET) \
 		-e INSTALL_PATH=/install/boot \
 		-e INSTALL_MOD_PATH=/install/$(DIR_ET) \
 		-w /code \
