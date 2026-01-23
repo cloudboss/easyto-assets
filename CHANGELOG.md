@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-01-23
+
+### Changed
+
+- Update build image to Go 1.25
+- Modify kernel path to modprobe
+
+### Fixed
+
+- Quote arguments passed to shell
+
 ## [0.5.0] - 2026-01-03
 
 ### Changed
@@ -51,6 +62,7 @@
 
 Initial release
 
+[0.5.1]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.1
 [0.5.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.0
 [0.4.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.4.0
 [0.3.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.3.0
