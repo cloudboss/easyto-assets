@@ -71,7 +71,7 @@ BUSYBOX_VERSION = 1.35.0
 BUSYBOX_URL = https://www.busybox.net/downloads/binaries/$(BUSYBOX_VERSION)-x86_64-linux-musl/busybox
 BUSYBOX_BIN = busybox-$(BUSYBOX_VERSION)
 
-ZLIB_VERSION = 1.3.1
+ZLIB_VERSION = 1.3.2
 ZLIB_SRC = zlib-$(ZLIB_VERSION)
 ZLIB_ARCHIVE = $(ZLIB_SRC).tar.gz
 ZLIB_URL = https://zlib.net/$(ZLIB_ARCHIVE)
