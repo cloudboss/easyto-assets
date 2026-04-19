@@ -27,6 +27,7 @@ DIR_TMPINSTALL_OPENSSH = openssh-tmpinstall
 DIR_TMPINSTALL_OPENSSL = openssl-tmpinstall
 DIR_TMPINSTALL_SUDO = sudo-tmpinstall
 DIR_TMPINSTALL_UTIL_LINUX = util-linux-tmpinstall
+DIR_TMPINSTALL_XFSPROGS = xfsprogs-tmpinstall
 DIR_TMPINSTALL_ZLIB = zlib-tmpinstall
 
 KERNEL_ORG = https://cdn.kernel.org/pub/linux
@@ -40,6 +41,11 @@ E2FSPROGS_VERSION = 1.47.3
 E2FSPROGS_SRC = e2fsprogs-$(E2FSPROGS_VERSION)
 E2FSPROGS_ARCHIVE = $(E2FSPROGS_SRC).tar.gz
 E2FSPROGS_URL = $(KERNEL_ORG)/kernel/people/tytso/e2fsprogs/v$(E2FSPROGS_VERSION)/$(E2FSPROGS_ARCHIVE)
+
+XFSPROGS_VERSION = 6.12.0
+XFSPROGS_SRC = xfsprogs-dev-$(XFSPROGS_VERSION)
+XFSPROGS_ARCHIVE = $(XFSPROGS_SRC).tar.gz
+XFSPROGS_URL = https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/snapshot/$(XFSPROGS_ARCHIVE)
 
 KERNEL_VERSION = 6.12.81
 KERNEL_VERSION_MAJ = $(shell echo $(KERNEL_VERSION) | cut -c 1)
@@ -116,11 +122,20 @@ CHRONY_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	hack/compile-chrony-ctr
 
 E2FSPROGS_BUILD_OUT = $(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/mke2fs \
-	$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs
+	$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/lib/libuuid.a
 
 E2FSPROGS_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	$(DIR_OUT)/$(E2FSPROGS_SRC) \
 	hack/compile-e2fsprogs-ctr
+
+XFSPROGS_BUILD_OUT = $(DIR_OUT)/$(DIR_TMPINSTALL_XFSPROGS)/sbin/mkfs.xfs
+
+XFSPROGS_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
+	$(DIR_OUT)/$(XFSPROGS_SRC) \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/lib/libuuid.a \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX)/lib/libblkid.a \
+	hack/compile-xfsprogs-ctr
 
 KERNEL_BUILD_DEPS = $(HAS_IMAGE_LOCAL) \
 	$(DIR_OUT)/$(KERNEL_SRC) \
@@ -210,6 +225,9 @@ $(DIR_OUT)/$(SYSTEMD_BOOT_ARCHIVE): | $(HAS_COMMAND_CURL)
 $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE) $(UTIL_LINUX_URL)
 
+$(DIR_OUT)/$(XFSPROGS_ARCHIVE): | $(HAS_COMMAND_CURL)
+	@curl -L -o $(DIR_OUT)/$(XFSPROGS_ARCHIVE) $(XFSPROGS_URL)
+
 $(DIR_OUT)/$(ZLIB_ARCHIVE): | $(HAS_COMMAND_CURL)
 	@curl -L -o $(DIR_OUT)/$(ZLIB_ARCHIVE) $(ZLIB_URL)
 
@@ -242,6 +260,9 @@ $(DIR_OUT)/$(SUDO_SRC): $(DIR_OUT)/$(SUDO_ARCHIVE)
 
 $(DIR_OUT)/$(UTIL_LINUX_SRC): $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE)
 	@tar zxmf $(DIR_OUT)/$(UTIL_LINUX_ARCHIVE) -C $(DIR_OUT)
+
+$(DIR_OUT)/$(XFSPROGS_SRC): $(DIR_OUT)/$(XFSPROGS_ARCHIVE)
+	@tar zxmf $(DIR_OUT)/$(XFSPROGS_ARCHIVE) -C $(DIR_OUT)
 
 $(DIR_OUT)/$(ZLIB_SRC): $(DIR_OUT)/$(ZLIB_ARCHIVE)
 	@tar zxmf $(DIR_OUT)/$(ZLIB_ARCHIVE) -C $(DIR_OUT)
@@ -348,6 +369,21 @@ $(UTIL_LINUX_BUILD_OUT) &: \
 		-w /code \
 		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-util-linux-ctr)"
 
+$(XFSPROGS_BUILD_OUT): \
+		$(XFSPROGS_BUILD_DEPS) \
+		| $(DIR_OUT)/$(DIR_TMPINSTALL_XFSPROGS)/
+	@docker run --rm -t \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(XFSPROGS_SRC):/code:Z \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_XFSPROGS):/$(DIR_TMPINSTALL_XFSPROGS):Z \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS):/$(DIR_TMPINSTALL_E2FSPROGS):Z \
+		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_UTIL_LINUX):/$(DIR_TMPINSTALL_UTIL_LINUX):Z \
+		-v $(DIR_ROOT)/hack/functions:/functions:Z \
+		-e DIR_TMPINSTALL_XFSPROGS=/$(DIR_TMPINSTALL_XFSPROGS) \
+		-e DIR_TMPINSTALL_E2FSPROGS=/$(DIR_TMPINSTALL_E2FSPROGS) \
+		-e DIR_TMPINSTALL_UTIL_LINUX=/$(DIR_TMPINSTALL_UTIL_LINUX) \
+		-w /code \
+		$(CTR_IMAGE_LOCAL) /bin/sh -c "$$(cat hack/compile-xfsprogs-ctr)"
+
 $(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/lib/libz.a: \
 		$(ZLIB_BUILD_DEPS) \
 		| $(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB)/
@@ -435,6 +471,13 @@ $(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.btrfs: \
 	@install -m 0755 \
 		$(DIR_OUT)/$(DIR_TMPINSTALL_BTRFS_PROGS)/bin/mkfs.btrfs.static \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.btrfs
+
+$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.xfs: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_XFSPROGS)/sbin/mkfs.xfs \
+		| $(VAR_DIR_ET) $(DIR_STG_BASE)/$(DIR_ET)/sbin/
+	@install -m 0755 \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_XFSPROGS)/sbin/mkfs.xfs \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.xfs
 
 $(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs: \
 		$(DIR_OUT)/$(DIR_TMPINSTALL_E2FSPROGS)/sbin/resize2fs \
@@ -574,6 +617,7 @@ $(DIR_STG_RUNTIME)/base.tar: \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext2 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext3 \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.ext4 \
+		$(DIR_STG_BASE)/$(DIR_ET)/sbin/mkfs.xfs \
 		$(DIR_STG_BASE)/$(DIR_ET)/sbin/resize2fs \
 		$(KMOD_STG_OUT) \
 		| $(HAS_COMMAND_FAKEROOT) $(DIR_STG_RUNTIME)/

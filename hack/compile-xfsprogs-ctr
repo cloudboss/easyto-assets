@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+
+. /functions
+
+INCLUDES="-I${DIR_TMPINSTALL_UTIL_LINUX}/include -I${DIR_TMPINSTALL_E2FSPROGS}/include"
+export CFLAGS="-O2 -g ${INCLUDES}"
+export CXXFLAGS="-O2 -g ${INCLUDES}"
+export LDFLAGS="-static -L${DIR_TMPINSTALL_UTIL_LINUX}/lib -L${DIR_TMPINSTALL_E2FSPROGS}/lib"
+
+make configure
+
+./configure \
+    --prefix=${DIR_TMPINSTALL_XFSPROGS} \
+    --disable-shared \
+    --disable-gettext \
+    --disable-scrub \
+    --disable-libicu \
+    --disable-lto
+
+make -j$(nproc) headers
+make -j$(nproc) include libfrog libxfs libxcmd mkfs LDFLAGS=-all-static
+make -C include install
+make -C libfrog install LDFLAGS=-all-static
+make -C libxfs install LDFLAGS=-all-static
+make -C libxcmd install LDFLAGS=-all-static
+make -C mkfs install LDFLAGS=-all-static
+strip ${DIR_TMPINSTALL_XFSPROGS}/sbin/mkfs.xfs
