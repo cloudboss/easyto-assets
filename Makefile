@@ -76,12 +76,12 @@ ZLIB_SRC = zlib-$(ZLIB_VERSION)
 ZLIB_ARCHIVE = $(ZLIB_SRC).tar.gz
 ZLIB_URL = https://zlib.net/$(ZLIB_ARCHIVE)
 
-OPENSSL_VERSION = 3.2.1
+OPENSSL_VERSION = 3.5.6
 OPENSSL_SRC = openssl-$(OPENSSL_VERSION)
 OPENSSL_ARCHIVE = $(OPENSSL_SRC).tar.gz
 OPENSSL_URL = https://www.openssl.org/source/$(OPENSSL_ARCHIVE)
 
-OPENSSH_VERSION = V_9_7_P1
+OPENSSH_VERSION = V_10_3_P1
 OPENSSH_SRC = openssh-portable-$(OPENSSH_VERSION)
 OPENSSH_ARCHIVE = $(OPENSSH_VERSION).tar.gz
 OPENSSH_URL = https://github.com/openssh/openssh-portable/archive/refs/tags/$(OPENSSH_ARCHIVE)
@@ -140,9 +140,11 @@ KMOD_STG_OUT = $(DIR_STG_BASE)/$(DIR_ET)/sbin/depmod \
 	$(DIR_STG_BASE)/$(DIR_ET)/sbin/modprobe \
 	$(DIR_STG_BASE)/$(DIR_ET)/sbin/rmmod
 
-OPENSSH_BUILD_OUT = $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
-	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
-	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server
+OPENSSH_BUILD_OUT = $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/bin/ssh-keygen \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/sbin/sshd \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sftp-server \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-session \
+	$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-auth
 
 OPENSSH_BUILD_DEPS = $(DIR_OUT)/$(OPENSSH_SRC) \
 	$(VAR_DIR_ET) \
@@ -299,14 +301,13 @@ $(OPENSSH_BUILD_OUT) &: \
 		| $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/
 	@docker run --rm -t \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(OPENSSH_SRC):/code:Z \
-		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH):/$(DIR_TMPINSTALL_OPENSSH):Z \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET):/$(DIR_ET):Z \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSL):/$(DIR_TMPINSTALL_OPENSSL):Z \
 		-v $(DIR_ROOT)/$(DIR_OUT)/$(DIR_TMPINSTALL_ZLIB):/$(DIR_TMPINSTALL_ZLIB):Z \
 		-e OPENSSH_DEFAULT_PATH=$(OPENSSH_DEFAULT_PATH) \
 		-e OPENSSH_PRIVSEP_DIR=$(OPENSSH_PRIVSEP_DIR) \
 		-e OPENSSH_PRIVSEP_USER=$(OPENSSH_PRIVSEP_USER) \
-		-e DIR_TMPINSTALL_OPENSSH=/$(DIR_TMPINSTALL_OPENSSH) \
+		-e DIR_ET=$(DIR_ET) \
 		-e DIR_TMPINSTALL_OPENSSL=/$(DIR_TMPINSTALL_OPENSSL) \
 		-e DIR_TMPINSTALL_ZLIB=/$(DIR_TMPINSTALL_ZLIB) \
 		-w /code \
@@ -495,9 +496,9 @@ $(DIR_STG_KERNEL)/boot/vmlinuz-$(KERNEL_VERSION): \
 	@rm -f $(DIR_STG_KERNEL)/$(DIR_ET)/lib/modules/$(KERNEL_VERSION)/source
 
 $(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen: \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/bin/ssh-keygen \
 		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/bin/
-	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/bin/ssh-keygen \
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/bin/ssh-keygen \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen
 
 $(DIR_STG_SSH)/$(DIR_ET)/bin/sudo: \
@@ -518,15 +519,27 @@ $(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers: \
 	@install -m 0440 files/etc/sudoers $(DIR_STG_SSH)/$(DIR_ET)/etc/sudoers
 
 $(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server: \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sftp-server \
 		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/libexec/
-	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/libexec/sftp-server \
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sftp-server \
 		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server
 
+$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-session: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-session \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/libexec/
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-session \
+		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-session
+
+$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-auth: \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-auth \
+		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/libexec/
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/libexec/sshd-auth \
+		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-auth
+
 $(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd: \
-		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
+		$(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/sbin/sshd \
 		| $(VAR_DIR_ET) $(DIR_STG_SSH)/$(DIR_ET)/sbin/
-	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/sbin/sshd \
+	@install -m 0755 $(DIR_OUT)/$(DIR_TMPINSTALL_OPENSSH)/$(DIR_ET)/sbin/sshd \
 		$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd
 
 $(DIR_STG_SSH)/$(DIR_ET)/services/ssh: \
@@ -587,6 +600,8 @@ $(DIR_STG_RUNTIME)/kernel.tar: \
 
 $(DIR_STG_RUNTIME)/ssh.tar: \
 		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sftp-server \
+		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-session \
+		$(DIR_STG_SSH)/$(DIR_ET)/libexec/sshd-auth \
 		$(DIR_STG_SSH)/$(DIR_ET)/bin/ssh-keygen \
 		$(DIR_STG_SSH)/$(DIR_ET)/sbin/sshd \
 		$(DIR_STG_SSH)/$(DIR_ET)/etc/ssh/sshd_config \

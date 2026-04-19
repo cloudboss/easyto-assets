@@ -4,7 +4,7 @@ set -e
 
 autoreconf -i
 ./configure LDFLAGS="-s -static" \
-    --prefix=${DIR_TMPINSTALL_OPENSSH} \
+    --prefix=/${DIR_ET} \
     --with-default-path=${OPENSSH_DEFAULT_PATH} \
     --with-privsep-path=${OPENSSH_PRIVSEP_DIR} \
     --with-privsep-user=${OPENSSH_PRIVSEP_USER} \
