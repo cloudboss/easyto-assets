@@ -9,12 +9,14 @@ ARG GID
 RUN apk add \
     autoconf \
     automake \
+    bash \
     bison \
     build-base \
     diffutils \
     elfutils-dev \
     flex \
     gcc \
+    inih-dev \
     libcap-dev \
     libcap-static \
     libtool \
@@ -29,6 +31,8 @@ RUN apk add \
     perl \
     python3 \
     tar \
+    userspace-rcu-dev \
+    userspace-rcu-static \
     xz-static \
     zlib-static \
     zstd-static
