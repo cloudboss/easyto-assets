@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-19
+
+### Added
+
+- Add `mkfs.xfs`.
+
+### Changed
+
+- Update kernel to latest LTS 6.12.81.
+- Trim kernel config for EC2 Nitro.
+- Update zlib to 1.3.2.
+- Update OpenSSH to 10.3p1.
+- Update OpenSSL to 3.5.6.
+
 ## [0.5.1] - 2026-01-23
 
 ### Changed
@@ -62,6 +76,7 @@
 
 Initial release
 
+[0.6.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.6.0
 [0.5.1]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.1
 [0.5.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.0
 [0.4.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.4.0
