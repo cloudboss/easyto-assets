@@ -30,7 +30,7 @@ PACKER_PLUGIN_AMZ_EXE = packer-plugin-amazon_v$(PACKER_PLUGIN_AMZ_VERSION)_x5.0_
 # will be rebuilt if the hash changes, as the dependency file will change.
 UID = $(shell id -u)
 GID = $(shell id -g)
-CTR_IMAGE_GO = golang:1.25.5-alpine3.23
+CTR_IMAGE_GO = ghcr.io/cloudboss/docker.io/library/golang:1.27.2-alpine3.24
 UID_SHA256 = $(shell echo -n $(UID) | sha256sum | awk '{print $$1}')
 GID_SHA256 = $(shell echo -n $(GID) | sha256sum | awk '{print $$1}')
 CTR_IMAGE_GO_SHA256 = $(shell echo -n $(CTR_IMAGE_GO) | sha256sum | awk '{print $$1}')
