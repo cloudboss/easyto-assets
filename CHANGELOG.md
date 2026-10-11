@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-10
+
+### Changed
+
+- Update kernel to latest LTS 6.18.55.
+- Update btrfsprogs to 7.1.
+- Update e2fsprogs to 1.47.4.
+- Update xfsprogs to 7.2.0.
+- Update kmod to v34.
+- Update systemd-boot to 253.5-1.
+- Update util-linux to 2.42.3.
+- Update chrony to 4.9.
+- Update openssl to 4.0.3.
+- Update openssh to V_10_6_P1.
+- Update packer to 1.16.1.
+- Update packer Amazon plugin to 1.8.3.
+
 ## [0.6.0] - 2026-04-19
 
 ### Added
@@ -76,6 +93,7 @@
 
 Initial release
 
+[0.7.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.7.0
 [0.6.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.6.0
 [0.5.1]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.1
 [0.5.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.0
