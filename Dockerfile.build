@@ -12,6 +12,7 @@ RUN apk add \
     bash \
     bison \
     build-base \
+    coreutils \
     diffutils \
     elfutils-dev \
     flex \

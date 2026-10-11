@@ -20,12 +20,11 @@ ifeq ($(OS), windows)
 EXE_SUFFIX = .exe
 endif
 
-PACKER_VERSION = 1.9.4
+PACKER_VERSION = 1.16.1
 PACKER_EXE = packer$(EXE_SUFFIX)
 
-PACKER_PLUGIN_AMZ_VERSION = 1.2.6
-PACKER_PLUGIN_AMZ_NAME = packer-plugin-amazon_v$(PACKER_PLUGIN_AMZ_VERSION)_x5.0_$(OS)_$(ARCH)
-PACKER_PLUGIN_AMZ_EXE = $(PACKER_PLUGIN_AMZ_NAME)$(EXE_SUFFIX)
+PACKER_PLUGIN_AMZ_VERSION = 1.8.3
+PACKER_PLUGIN_AMZ_EXE = packer-plugin-amazon_v$(PACKER_PLUGIN_AMZ_VERSION)_x5.0_$(OS)_$(ARCH)$(EXE_SUFFIX)
 
 # The Dockerfile and its args are hashed to create a unique tag. The image
 # will be rebuilt if the hash changes, as the dependency file will change.
