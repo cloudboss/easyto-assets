@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-10-11
+
+### Changed
+
+- Update go image version to 1.27.2.
+
 ## [0.7.0] - 2026-10-10
 
 ### Changed
@@ -93,6 +99,7 @@
 
 Initial release
 
+[0.7.1]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.7.1
 [0.7.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.7.0
 [0.6.0]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.6.0
 [0.5.1]: https://github.com/cloudboss/easyto-assets/releases/tag/v0.5.1
